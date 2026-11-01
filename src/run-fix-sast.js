@@ -27,18 +27,13 @@ async function runFixSast(workspaceDir, actionPath, fixScaParams, sourceCodeDir)
         workspaceDir,
         'veracode_artifact_directory',
         'results.json'
-      ),
-      // '--async',
-      // '--decouple',
-      // 'true',
+      )
     ];
 
     const credentialsPath = path.join(os.homedir(), '.veracode', 'credentials');
     if (!fs.existsSync(credentialsPath)) {
       const apiId = process.env.VERACODE_API_KEY_ID;
       const apiKey = process.env.VERACODE_API_KEY_SECRET;
-      core.info(`API KEY ${apiId}`);
-      core.info(`API SECRET ${apiKey}`);
       if (apiId && apiKey) {
         const credentialsDir = path.dirname(credentialsPath);
         fs.mkdirSync(credentialsDir, { recursive: true });
@@ -63,16 +58,6 @@ async function runFixSast(workspaceDir, actionPath, fixScaParams, sourceCodeDir)
     await exec.exec(veracodeBinary, args, {
       env: { ...process.env },
       cwd: sourceCodeDir,
-      // listeners: {
-      //   stdout: (data) => core.debug(`CLI stdout chunk: ${data.toString()}`),
-      //   stderr: (data) => core.debug(`CLI stderr chunk: ${data.toString()}`),
-      //   stdline: (line) => {
-      //     core.info(`CLI response: ${line}`);
-      //     allStdLines.push(line);
-      //   },
-      //   errline: (line) => core.warning(`CLI error: ${line}`),
-      //   debug: (message) => core.debug(`CLI debug: ${message}`)
-      // }
     });
 
     core.info(`CLI execution completed. Checking for changes in source code directory: ${sourceCodeDir}`);
@@ -84,14 +69,12 @@ async function runFixSast(workspaceDir, actionPath, fixScaParams, sourceCodeDir)
     if (fs.existsSync(reportPath)) {
       try {
         const rawReport = fs.readFileSync(reportPath, 'utf8');
-        core.info(`----- Raw sast-fix-report.md -----\n${rawReport}`);
         const resultsJson = JSON.parse(fs.readFileSync(resultsFilePath, 'utf8'));
         const cweSeverityMap = buildCweSeverityMap(resultsJson);
         reportContent = appendSeverityToReport(rawReport, cweSeverityMap);
         reportContent = appendRescanNote(reportContent);
         fs.writeFileSync(reportPath, reportContent, 'utf8');
         core.info('Enriched sast-fix-report.md with CWE severity information');
-        core.info(`----- Enriched sast-fix-report.md -----\n${reportContent}`);
       } catch (reportError) {
         core.warning(`Failed to enrich sast-fix-report.md with severity info: ${reportError.message}`);
         reportContent = fs.readFileSync(reportPath, 'utf8');

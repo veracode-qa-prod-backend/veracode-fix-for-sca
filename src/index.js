@@ -22,9 +22,6 @@ async function main() {
     const fixSastParams = core.getInput('fix-sast-params');
     const resultsBlobSha = core.getInput('results-blob-sha');
 
-    core.info(`DEBUG: fixScaParams = "${fixScaParams}"`);
-    core.info(`DEBUG: fixSastParams = "${fixSastParams}"`);
-
     // Determine if this is SAST or SCA fix
     const isSastFix = fixSastParams && fixSastParams.includes('SAST-');
     let paramsToUse = isSastFix ? fixSastParams : fixScaParams;
