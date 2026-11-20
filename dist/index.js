@@ -39491,8 +39491,7 @@ function generateSastCommentBody(reportContent, fixPrNumber, fixPrUrl) {
 /**
  * Pulls distinct Fix IDs out of the report's "Fix ID: ..." lines, in first-seen order.
  * Tolerates the label and/or value being wrapped in markdown emphasis (`**Fix ID:**`)
- * or inline code (`` `SAST-xxxx-xx` ``), and a single line listing several comma-separated
- * IDs (`` `SAST-8760, SAST-8672` ``).
+ * or inline code (`` `SAST-xxxx-xx` ``).
  */
 function extractFixIds(reportContent) {
   const fixIds = [];
