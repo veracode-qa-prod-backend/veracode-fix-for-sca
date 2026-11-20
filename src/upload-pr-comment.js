@@ -12,7 +12,7 @@ const github = require('@actions/github');
  * comment itself from the sca-fix-report.md uploaded in the "fix-for-sca-artifacts" artifact
  * (post-action.js), so there is nothing for this action to do for the SCA path.
  */
-async function uploadPrComment(workspaceDir, repository, prNumber, githubToken, githubApiUrl, sourceCodeDir, isSastFix = false, fixPrNumber = null, fixPrUrl = null) {
+async function uploadPrComment(repository, prNumber, githubToken, sourceCodeDir, isSastFix = false, fixPrNumber = null, fixPrUrl = null) {
   const [owner, repo] = repository.split('/');
   if (!owner || !repo) {
     throw new Error(`Invalid repository format. Expected 'owner/repo', got '${repository}'`);
@@ -102,17 +102,21 @@ function generateSastCommentBody(reportContent, fixPrNumber, fixPrUrl) {
 /**
  * Pulls distinct Fix IDs out of the report's "Fix ID: ..." lines, in first-seen order.
  * Tolerates the label and/or value being wrapped in markdown emphasis (`**Fix ID:**`)
- * or inline code (`` `SAST-xxxx-xx` ``).
+ * or inline code (`` `SAST-xxxx-xx` ``), and a single line listing several comma-separated
+ * IDs (`` `SAST-8760, SAST-8672` ``).
  */
 function extractFixIds(reportContent) {
   const fixIds = [];
   const seen = new Set();
-  const regex = /Fix ID:[*`\s]*([\w.-]+)/g;
+  const regex = /Fix ID:[*`\s]*([^\n`]+)/g;
   let match;
   while ((match = regex.exec(reportContent)) !== null) {
-    if (!seen.has(match[1])) {
-      seen.add(match[1]);
-      fixIds.push(match[1]);
+    for (const rawId of match[1].split(',')) {
+      const id = rawId.trim().replace(/^[*`\s]+|[*`\s]+$/g, '');
+      if (id && !seen.has(id)) {
+        seen.add(id);
+        fixIds.push(id);
+      }
     }
   }
   return fixIds;
