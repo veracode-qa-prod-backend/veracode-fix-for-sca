@@ -4,7 +4,7 @@ const os = require('os');
 const core = require('@actions/core');
 const exec = require('@actions/exec');
 
-async function runFixSast(workspaceDir, sourceCodeDir) {
+async function runFixSast(workspaceDir, actionPath, fixScaParams, sourceCodeDir) {
   try {
     // Pass the downloaded SAST results from the GitHub workspace to the CLI.
     const resultsFilePath = path.join(workspaceDir, 'veracode_artifact_directory', 'results.json');

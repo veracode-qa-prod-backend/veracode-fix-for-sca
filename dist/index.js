@@ -38950,7 +38950,7 @@ const os = __nccwpck_require__(857);
 const core = __nccwpck_require__(7484);
 const exec = __nccwpck_require__(5236);
 
-async function runFixSast(workspaceDir, sourceCodeDir) {
+async function runFixSast(workspaceDir, actionPath, fixScaParams, sourceCodeDir) {
   try {
     // Pass the downloaded SAST results from the GitHub workspace to the CLI.
     const resultsFilePath = path.join(workspaceDir, 'veracode_artifact_directory', 'results.json');
