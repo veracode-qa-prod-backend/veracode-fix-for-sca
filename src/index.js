@@ -89,9 +89,11 @@ async function main() {
     // Create Pull Request
     core.info('Creating pull request...');
     const prCreateOutput = await createPr(
+      workspaceDir,
       repository,
       branch,
       githubToken,
+      githubApiUrl,
       sourceCodeDir,
       isSastFix
     );

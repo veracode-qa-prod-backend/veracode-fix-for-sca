@@ -12,7 +12,7 @@ const github = require('@actions/github');
  * comment itself from the sca-fix-report.md uploaded in the "fix-for-sca-artifacts" artifact
  * (post-action.js), so there is nothing for this action to do for the SCA path.
  */
-async function uploadPrComment(repository, prNumber, githubToken, sourceCodeDir, isSastFix = false, fixPrNumber = null, fixPrUrl = null) {
+async function uploadPrComment(workspaceDir, repository, prNumber, githubToken, githubApiUrl, sourceCodeDir, isSastFix = false, fixPrNumber = null, fixPrUrl = null) {
   const [owner, repo] = repository.split('/');
   if (!owner || !repo) {
     throw new Error(`Invalid repository format. Expected 'owner/repo', got '${repository}'`);
