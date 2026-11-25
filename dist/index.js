@@ -38968,6 +38968,37 @@ function logFileContents(label, filePath) {
   }
 }
 
+/**
+ * Collects the unique fix_id values from results.json. fix_id is a per-finding field
+ * (findings[].fix_id) that veracode-github-app only sets on the findings the user requested,
+ * so findings without it are skipped.
+ */
+function extractResultsFixIds(resultsJson) {
+  const fixIds = new Set();
+  if (Array.isArray(resultsJson?.findings)) {
+    resultsJson.findings.forEach((finding) => {
+      if (finding?.fix_id) {
+        fixIds.add(String(finding.fix_id));
+      }
+    });
+  }
+  return Array.from(fixIds);
+}
+
+/**
+ * Logs the fix_ids present in results.json.
+ */
+function logResultsFixIds(resultsFilePath) {
+  try {
+    const resultsJson = JSON.parse(fs.readFileSync(resultsFilePath, 'utf8'));
+    const total = Array.isArray(resultsJson?.findings) ? resultsJson.findings.length : 0;
+    const fixIds = extractResultsFixIds(resultsJson);
+    core.info(`fix_ids in results.json (${fixIds.length} unique, ${total} total findings): ${fixIds.length ? fixIds.join(', ') : 'none'}`);
+  } catch (error) {
+    core.warning(`Failed to extract fix_ids from results.json: ${error.message}`);
+  }
+}
+
 async function runFixSast(workspaceDir, actionPath, fixScaParams, sourceCodeDir) {
   try {
     // Pass the downloaded SAST results from the GitHub workspace to the CLI.
@@ -39019,6 +39050,7 @@ async function runFixSast(workspaceDir, actionPath, fixScaParams, sourceCodeDir)
 
     // Log the exact results.json the CLI is about to consume.
     logFileContents('results.json', resultsFilePath);
+    logResultsFixIds(resultsFilePath);
 
     // @actions/exec forwards CLI stdout and stderr to the GitHub Actions log.
     core.info(`Running: ${veracodeBinary} ${args.join(' ')}`);
